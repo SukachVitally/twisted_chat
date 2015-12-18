@@ -56,7 +56,6 @@ class ChatFactory(ServerFactory):
     connections = []
 
 
-
 def main():
     options, server_addr = parse_args()
     print 'Start server', options, server_addr

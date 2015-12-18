@@ -1,0 +1,23 @@
+{
+  "name": "twisted chat",
+  "description": "Test front application for twisted chat",
+  "main": "gulpfile.js",
+  "authors": [
+    "me"
+  ],
+  "license": "BSD",
+  "keywords": [
+    "test"
+  ],
+  "moduleType": [],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.6",
+    "requirejs": "~2.1.22",
+  }
+}
