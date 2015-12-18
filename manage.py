@@ -1,66 +1,43 @@
-import optparse
-from twisted.internet import reactor
-from twisted.internet.protocol import Protocol
-from twisted.internet.protocol import ServerFactory
+from autobahn.twisted.websocket import WebSocketServerProtocol
+from autobahn.twisted.websocket import WebSocketServerFactory
 
 
-def parse_args():
-    usage = """
-    python manage.py [hostname]:port
-    """
+class ChatProtocol(WebSocketServerProtocol):
 
-    parser = optparse.OptionParser(usage)
+    def onConnect(self, request):
+        print 'connect'
 
-    help = "The port to listen on. Default to a random available port."
-    parser.add_option('--port', type='int', help=help)
-
-    options, args = parser.parse_args()
-
-    if len(args) != 1:
-        parser.error('Provide exactly one server address.')
-
-    def parse_address(addr):
-        if ':' not in addr:
-            host = '127.0.0.1'
-            port = addr
-        else:
-            host, port = addr.split(':', 1)
-
-        if not port.isdigit():
-            parser.error('Ports must be integers.')
-
-        return host, int(port)
-
-    return options, parse_address(args[0])
-
-
-class ChatProtocol(Protocol):
-
-    def connectionMade(self):
+    def onOpen(self):
+        print("WebSocket connection open.")
         self.factory.connections.append(self)
-        self.transport.write('Now {0} in chat\n'.format(len(self.factory.connections)))
+        self.sendMessage('Now {0} in chat\n'.format(len(self.factory.connections)))
 
-    def connectionLost(self, reason):
+    def onMessage(self, payload, isBinary):
+        message = 'binnary' if isBinary else payload.decode('utf8')
+
+        for connection in self.factory.connections:
+            connection.sendMessage('--| {0}\n'.format(message))
+
+    def onClose(self, wasClean, code, reason):
         for connection in self.factory.connections:
             if connection is self:
                 self.factory.connections.remove(connection)
 
-    def dataReceived(self, data):
-        for connection in self.factory.connections:
-            connection.transport.write('--| {0}\n'.format(data))
 
-
-class ChatFactory(ServerFactory):
+class ChatFactory(WebSocketServerFactory):
 
     protocol = ChatProtocol
     connections = []
 
 
 def main():
-    options, server_addr = parse_args()
-    print 'Start server', options, server_addr
-    factory = ChatFactory()
-    reactor.listenTCP(server_addr[1], factory)
+    import sys
+    from twisted.python import log
+    from twisted.internet import reactor
+
+    log.startLogging(sys.stdout)
+    factory = ChatFactory(u"ws://127.0.0.1:8000", debug=False)
+    reactor.listenTCP(8000, factory)
     reactor.run()
 
 if __name__ == '__main__':
