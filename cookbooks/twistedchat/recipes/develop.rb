@@ -10,6 +10,12 @@ execute 'venv init' do
 end
 Chef::Log.warn("Virtualenv directory created")
 
+execute 'gulp install' do
+  command "npm install -g gulp"
+  action :run
+end
+Chef::Log.warn("Gulp installed global")
+
 template "/etc/nginx/nginx.conf" do
     source 'nginx.conf.erb'
     mode '0644'

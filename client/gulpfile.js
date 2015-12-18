@@ -2,7 +2,6 @@ var gulp = require('gulp');
 var gutil = require('gulp-util');
 var runSequence = require('run-sequence');
 var bower = require('gulp-bower');
-var jade = require('gulp-jade');
 
 var basePaths = {
     src: './app/',
@@ -19,10 +18,6 @@ var PATH = {
         src: basePaths.src + 'css/',
         dest: basePaths.dest + 'css/'
     },
-    templates: {
-        src: basePaths.src + 'scripts/',
-        dest: basePaths.dest + 'js/'
-    },
     scripts: {
         src: basePaths.src + 'scripts/',
         dest: basePaths.dest + 'js/'
@@ -35,22 +30,12 @@ var PATH = {
 var appFiles = {
     html: PATH.html.src + '*.html',
     styles: PATH.styles.src + '*.css',
-    coffee: PATH.scripts.src + '**/*.coffee',
-    templates: PATH.templates.src + '**/*.jade'
+    scripts: PATH.scripts.src + '**/*.js',
 };
 
-gulp.task('coffee', function() {
-  gulp.src(appFiles.coffee)
-    .pipe(coffee({bare: true}).on('error', gutil.log))
-    .pipe(gulp.dest(PATH.scripts.dest))
-});
-
-gulp.task('templates', function() {
-  gulp.src(appFiles.templates)
-    //.pipe(jade({
-    //  client: true
-    //}))
-    .pipe(gulp.dest(PATH.templates.dest))
+gulp.task('scripts', function() {
+  return gulp.src(appFiles.scripts)
+    .pipe(gulp.dest(PATH.scripts.dest));
 });
 
 gulp.task('html', function () {
@@ -64,7 +49,7 @@ gulp.task('styles', function () {
 });
 
 gulp.task('build', function (cb) {
-  runSequence(['coffee', 'html', 'styles', 'templates', 'bower'], cb);
+  runSequence(['scripts', 'html', 'styles', 'bower'], cb);
 });
 
 gulp.task('bower', function() {
@@ -74,6 +59,5 @@ gulp.task('bower', function() {
 
 gulp.task('develop', ['build'], function () {
     gulp.watch(appFiles.html, ['html']);
-    gulp.watch(appFiles.coffee, ['coffee']);
-    gulp.watch(appFiles.templates, ['templates']);
+    gulp.watch(appFiles.scripts, ['scripts']);
 });
