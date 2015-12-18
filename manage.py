@@ -37,21 +37,24 @@ def parse_args():
 class ChatProtocol(Protocol):
 
     def connectionMade(self):
-        self.factory.numConnections += 1
-        print self.factory.numConnections
+        self.factory.connections.append(self)
+        self.transport.write('Now {0} in chat\n'.format(len(self.factory.connections)))
 
     def connectionLost(self, reason):
-        self.factory.numConnections -= 1
-        print self.factory.numConnections
+        for connection in self.factory.connections:
+            if connection is self:
+                self.factory.connections.remove(connection)
+
+    def dataReceived(self, data):
+        for connection in self.factory.connections:
+            connection.transport.write('--| {0}\n'.format(data))
 
 
 class ChatFactory(ServerFactory):
 
     protocol = ChatProtocol
-    numConnections = 0
+    connections = []
 
-    def __init__(self):
-        pass
 
 
 def main():
