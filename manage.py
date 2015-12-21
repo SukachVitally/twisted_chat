@@ -18,6 +18,7 @@ class ChatProtocol(WebSocketServerProtocol):
 
     def onMessage(self, payload, isBinary):
         message = 'binnary' if isBinary else payload.decode('utf8')
+        self.factory.dbpool.runOperation("insert into messages(text) values('{0}')".format(message))
 
         for connection in self.factory.connections:
             connection.sendMessage('--| {0}\n'.format(message))
