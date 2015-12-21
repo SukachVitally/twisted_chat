@@ -5,7 +5,7 @@ function ChatView(socket, block) {
     this.init = function() {
         var self = this;
         this.$message_container = this.$block.find('#chat-content');
-        this.$sender = this.$block.find('#sender button');
+        this.$sender = this.$block.find('#sender');
 
         this.socket.onopen = function() {
             self.renderMessage('--- Connected ---');
@@ -23,8 +23,9 @@ function ChatView(socket, block) {
             }
         };
 
-        this.$sender.on('click', function(e) {
-            var input = self.$block.find('input');
+        this.$sender.on('submit', function(e) {
+            e.preventDefault()
+            var input = self.$sender.find('input');
             self.sendMessage(input.val());
             input.val('');
         })
