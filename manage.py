@@ -1,5 +1,7 @@
 from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.twisted.websocket import WebSocketServerFactory
+from twisted.enterprise import adbapi
+from twisted.python import util
 
 
 class ChatProtocol(WebSocketServerProtocol):
@@ -9,6 +11,8 @@ class ChatProtocol(WebSocketServerProtocol):
 
     def onOpen(self):
         print("WebSocket connection open.")
+        d = self.factory.dbpool.runQuery("select user")
+        d.addCallback(lambda result: util.println('user', result))
         self.factory.connections.append(self)
         self.sendMessage('Now {0} in chat\n'.format(len(self.factory.connections)))
 
@@ -37,6 +41,8 @@ def main():
 
     log.startLogging(sys.stdout)
     factory = ChatFactory(u"ws://127.0.0.1:8000", debug=False)
+    factory.dbpool = adbapi.ConnectionPool("psycopg2", dbname='twisted', host='10.0.2.2', user='sukach',
+                                           password='204839')
     reactor.listenTCP(8000, factory)
     reactor.run()
 
