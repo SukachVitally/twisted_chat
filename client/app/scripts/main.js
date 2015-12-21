@@ -1,22 +1,48 @@
-socket = new WebSocket("ws://127.0.0.1:8000");
-socket.onopen = function() {
-  alert("Соединение установлено.");
-  socket.send('hello')
-};
+function ChatView(socket, block) {
+    this.socket = socket;
+    this.$block = block;
 
-socket.onclose = function(event) {
-  if (event.wasClean) {
-    alert('Соединение закрыто чисто');
-  } else {
-    alert('Обрыв соединения'); // например, "убит" процесс сервера
-  }
-  alert('Код: ' + event.code + ' причина: ' + event.reason);
-};
+    this.init = function() {
+        var self = this;
+        this.$message_container = this.$block.find('#chat-content');
+        this.$sender = this.$block.find('#sender button');
 
-socket.onmessage = function(event) {
-  alert("Получены данные " + event.data);
-};
+        this.socket.onopen = function() {
+            self.renderMessage('--- Connected ---');
+        };
 
-socket.onerror = function(error) {
-  alert("Ошибка " + error.message);
-};
+        this.socket.onmessage = function(event) {
+            self.renderMessage('>>> ' + event.data);
+        };
+
+        this.socket.onclose = function(event) {
+            if (event.wasClean) {
+                self.renderMessage('--- Disconnected ---');
+            } else {
+                self.renderMessage('--- Server aborted ---');
+            }
+        };
+
+        this.$sender.on('click', function(e) {
+            var input = self.$block.find('input');
+            self.sendMessage(input.val());
+            input.val('');
+        })
+    }
+
+    this.renderMessage = function(message) {
+        this.$message_container.prepend($('<p>' + message + '</p>'));
+    }
+
+    this.sendMessage = function(message) {
+        this.socket.send(message)
+    }
+}
+
+$(function(){
+    var socket = new WebSocket("ws://127.0.0.1:8000");
+    var chat = new ChatView(socket, $('#chat-block'));
+    chat.init();
+})
+
+

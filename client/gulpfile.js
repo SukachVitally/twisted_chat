@@ -60,4 +60,5 @@ gulp.task('bower', function() {
 gulp.task('develop', ['build'], function () {
     gulp.watch(appFiles.html, ['html']);
     gulp.watch(appFiles.scripts, ['scripts']);
+    gulp.watch(appFiles.styles, ['styles']);
 });
